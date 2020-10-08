@@ -30,9 +30,6 @@ const App = () => {
   return (
     <div className={classes.wrapper}>
       <h1>Score Calculator</h1>
-      <TextField required label="Student ID Number" variant="outlined" className={classes.textInput} />
-      <TextField required label="Your Name (full)" variant="outlined" className={classes.textInput} />
-      <br />
       <h2>2A semester</h2>
       <FormControl component="fieldset">
         {courses2A.map((course, idx) => (
@@ -60,15 +57,19 @@ const App = () => {
         ))}
       </FormControl>
       <div>
-      <Button
-        variant="contained"
-        color="primary"
-        size="large"
-        className={classes.button}
-        startIcon={<SaveIcon />}
-      >
-        Export PDF
-      </Button>
+        <TextField required label="Student ID" variant="outlined" className={classes.textInput} />
+        <TextField required label="Your Name (full)" variant="outlined" className={classes.textInput} />
+      </div>
+      <div>
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          className={classes.button}
+          startIcon={<SaveIcon />}
+        >
+          Export PDF
+        </Button>
       </div>
     </div>
     
