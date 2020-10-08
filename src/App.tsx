@@ -1,11 +1,12 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core';
-import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, TextField } from '@material-ui/core'
+import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, TextField, Button } from '@material-ui/core';
+import SaveIcon from '@material-ui/icons/Save';
 import { courses2A, courses3S } from './courses'
 
 const grades = ['A+', 'A', 'B', 'C', 'Fail', 'Absent']
 
-const useStyles = makeStyles(() => {
+const useStyles = makeStyles((theme) => {
   return {
     wrapper: {
       background: '#ffefe8',
@@ -17,7 +18,10 @@ const useStyles = makeStyles(() => {
     },
     eachInputWrap: {
       margin: '15px 0'
-    }
+    },
+    button: {
+      margin: theme.spacing(1),
+    },
   }
 })
 
@@ -25,7 +29,7 @@ const App = () => {
   const classes = useStyles()
   return (
     <div className={classes.wrapper}>
-      <h1>Lab selection score calculator</h1>
+      <h1>Score Calculator</h1>
       <TextField required label="Student ID Number" variant="outlined" className={classes.textInput} />
       <TextField required label="Your Name (full)" variant="outlined" className={classes.textInput} />
       <br />
@@ -55,6 +59,17 @@ const App = () => {
           </div>
         ))}
       </FormControl>
+      <div>
+      <Button
+        variant="contained"
+        color="primary"
+        size="large"
+        className={classes.button}
+        startIcon={<SaveIcon />}
+      >
+        Export PDF
+      </Button>
+      </div>
     </div>
     
   );
