@@ -121,7 +121,7 @@ const App = () => {
             <p>{average3S} {averageBoth < average3S && <span className={classes.higher}>[higher!]</span>}</p>
         </CardContent>
       </Card>
-      <div>
+      {/* <div>
         <TextField required label="Student ID" variant="outlined" className={classes.textInput} />
         <TextField required label="Your Name (full)" variant="outlined" className={classes.textInput} />
       </div>
@@ -135,7 +135,7 @@ const App = () => {
         >
           Export PDF
         </Button>
-      </div>
+      </div> */}
     </div>
     
   );
