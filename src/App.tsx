@@ -22,7 +22,8 @@ const useStyles = makeStyles((theme) => {
       margin: '15px 0'
     },
     button: {
-      margin: theme.spacing(1),
+      margin: '10px auto',
+      display: 'block',
     },
     result: {
       textAlign: 'center',
@@ -113,6 +114,15 @@ const App = () => {
           </div>
         ))}
       </FormControl>
+      <Button
+          variant="contained"
+          color="secondary"
+          size="large"
+          className={classes.button}
+          onClick={() => {window.location.reload()}}
+        >
+          RESET
+        </Button>
       <Card className={classes.result}>
         <CardContent>
           <h3>2A + 3S</h3>
