@@ -3,10 +3,17 @@ import { Accordion, AccordionDetails, AccordionSummary, Checkbox, FormGroup, For
 import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, TextField, Button, Card, CardContent } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import { courses2A, courses3S } from './courses'
+import { course, courses2A, courses3S } from './courses'
+import { ScoreDisplay } from './components/ScoreDisplay'
 
 type grade = 'A+'| 'A'| 'B'| 'C'| 'Fail'| 'Absent';
 const grades: grade[] = ['A+', 'A', 'B', 'C', 'Fail', 'Absent']
+export type semesters = '2A' | '3S'
+export type CoursesData = course & {grade: grade | undefined; excludedBoth: boolean; excluded3S: boolean }
+export type AverageScore = { both: number; '3S': number }
+
+type TotalValue = {score: number, credit: number}
+export type TotalValues = {'2A' : TotalValue, '3S': TotalValue}
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -43,12 +50,12 @@ const useStyles = makeStyles((theme) => {
   }
 })
 
+export type scoreData = {name : string; score: number; credit: number; semester: semesters;}
+
 const App = () => {
   const classes = useStyles()
 
-  type semesters = '2A' | '3S'
-  type scoreData = {name : string; score: number; credit: number; semester: semesters;}
-  const getScore = (grade: grade) => {
+  const getScore = (grade: grade): number => {
     switch (grade) {
       case 'A+':
         return 4.3;
@@ -63,83 +70,90 @@ const App = () => {
     }
   }
 
-  // 成績が入力された科目の情報を保存するstate
-  const [courses, setCourses]: [scoreData[], React.Dispatch<React.SetStateAction<scoreData[]>>] = useState([] as scoreData[]);
-  // 選択時に走る函数
-  const manageCourse = (name: string, credit: number, semester: semesters, grade: grade) => {
-    const targetCourse = courses.find(c => c.name === name);
-    const newElement: scoreData = {name, semester, credit, score: getScore(grade)};
+  const coursesDataInit: CoursesData[] = [...courses2A, ...courses3S].map(c => ({ ...c, grade: undefined, excludedBoth: false, excluded3S: false}))
+  // 全ての成績に関する情報をこのstateに格納する
+  const [coursesData, setCoursesData] = useState(coursesDataInit)
 
-    if (typeof targetCourse === 'undefined') {
-      // 初めて選択された場合
-      setCourses([...courses, newElement]);
-    } else {
-      // 選択肢の変更
-      setCourses([...courses.filter(c => c.name !== name), newElement]);
-    }
+  // ラジオボタンの選択時に走る函数
+  const manageEachCourse = (name: string, grade: grade) => {
+    setCoursesData(coursesData.map(c => (
+      c.name === name
+        ? 
+          {
+            name: c.name,
+            credit: c.credit,
+            semester: c.semester,
+            grade: grade,
+            excludedBoth: c.excludedBoth,
+            excluded3S: c.excluded3S
+          }
+        : c      
+    )))
   }
 
+  // 除外函数
+  const toggleExclusionEachCourse = (name: string, kind: 'both' | '3S') => {
+    setCoursesData(coursesData.map(c => (
+      c.name === name
+        ? 
+          {
+            name: c.name,
+            credit: c.credit,
+            semester: c.semester,
+            grade: c.grade,
+            excludedBoth: kind === 'both' ? !c.excludedBoth : c.excludedBoth,
+            excluded3S: kind === '3S' ? !c.excluded3S : c.excluded3S,
+          }
+        : c      
+    )))
+  }
 
-  // 点数の計算
-  // for both semester
-  const [averageBoth, setAverageBoth] = useState(0);
-  // for only 3S semester
-  const [average3S, setAverage3S] = useState(0)
-  
-  // exclusion
-  const [excludeBoth, setExcludeBoth] = useState([] as scoreData[])
-  const [exclusionNumBoth, setExclusionNumBoth] = useState(0);
+  // 平均値の計算
+  const [totalValues, setTotalValues] = useState({
+    '2A': {score: 0, credit: 0},
+    '3S': {score: 0, credit: 0}
+  } as TotalValues)
 
-  // exclusionのチェックボックスの開閉で作動する函数
-  const handleExcludeBoth = (course: scoreData, isNew: boolean) => {
-    isNew
-      ? setExcludeBoth([...excludeBoth, course])
-      : setExcludeBoth(excludeBoth.filter(e => e.name !== course.name))
-  };
+  const [averageScore, setAverageScore] = useState({ both: 0, '3S' : 0 } as AverageScore)
 
-  // courseの追加を監視し、exclusion可能な単位数を計算する
+
   useEffect(() => {
-    const totalCredits = courses.reduce((pre, cur) => (pre + cur.credit), 0);
-    setExclusionNumBoth(totalCredits < 15 ? 0 : totalCredits < 25 ? 2 : totalCredits < 30 ? 3 : 4)
-  }, [courses]);
-
-  const [exclude3S, setExclude3S] = useState([] as scoreData[])
-  const handleExclude3S = (event: React.ChangeEvent<{ value: unknown }>) => {
-    // setExclude3S(event.target.value as string[]);
-  };
-
-  // checkedのvalueとして使うbooleanを出力する函数。
-  const isExcluded = (dataArr: scoreData[], target: scoreData) => dataArr.some(datum => datum.name === target.name)
-
-  // もうこれ以上excludeできないときにfalse, まだできるときにtrueを返す
-  const isUnderLimit = (upper: number, dataArr: scoreData[]) => dataArr.reduce((pre, cur) => (pre + cur.credit), 0) < upper
-
-  const [isUnderLimitBoth, setIsUnderLimitBoth] = useState(true)
-  useEffect(() => {
-    setIsUnderLimitBoth(isUnderLimit(exclusionNumBoth, excludeBoth))
-  }, [courses, excludeBoth, exclusionNumBoth])
-
-  // courses, exclusionを監視して点数を計算する
-  useEffect(() => {
-    // 点数合計 / 単位数合計
-    if (courses.length > 0) {
-      const coursesExclusionBothConsidered = courses.filter(c => !excludeBoth.some(ex => ex.name === c.name));
-      setAverageBoth(coursesExclusionBothConsidered.reduce((pre, cur) => (pre + (cur.score * cur.credit)), 0) / coursesExclusionBothConsidered.reduce((pre, cur) => (pre + cur.credit), 0))
-      const coursesExclusion3SConsidered = courses.filter(c => c.semester === '3S' && !exclude3S.some(ex => ex.name === c.name));
-      if (coursesExclusion3SConsidered.length > 0) {
-        setAverage3S(coursesExclusion3SConsidered.reduce((pre, cur) => (pre + (cur.score * cur.credit)), 0) / coursesExclusion3SConsidered.reduce((pre, cur) => (pre + (cur.credit)), 0))  
+    // 計算函数の定義
+    const getTotalValues = (target: semesters[]) => 
+    // まず単位数合計と点数合計を計算する
+    coursesData.reduce((pre: {score: number, credit: number}, cur) => (
+      // 当該セメスターの科目であり、かつ、ラジオボタンに何かしらの成績が入力されているものが計算対象
+      target.includes(cur.semester) && typeof cur.grade !== 'undefined'
+        ? {
+          score: pre.score + (getScore(cur.grade) * cur.credit),
+          credit: pre.credit + cur.credit,
+        }
+        : pre
+      ), {score: 0, credit: 0})
+    
+    // 取得単位数、合計得点を計算して格納する
+    const [totalValues2A, totalValues3S] = [getTotalValues(['2A']), getTotalValues(['3S'])]
+    setTotalValues({
+      '2A': {
+        score: totalValues2A.score,
+        credit: totalValues2A.credit,
+      },
+      '3S': {
+        score: totalValues3S.score,
+        credit: totalValues3S.credit,
       }
-    }
-  }, [courses, exclude3S, excludeBoth])
+    })
+  }, [coursesData])
 
-  // excludeできない状態になっていないかを確認する
-  // 念のための処理。実際は選択部分がラジオボタンなのでconsoleで強制的にいじるなどしない限り発動しないはず
+  // 成績データの監視
   useEffect(() => {
-    if (exclusionNumBoth === 0) {
-      excludeBoth.length = 0; // reset the array
-    }
-  }, [excludeBoth.length, exclusionNumBoth])
-
+    // 平均値の計算
+    setAverageScore({
+      both: ((totalValues["2A"].score + totalValues["3S"].score) / (totalValues["2A"].credit + totalValues["3S"].credit)) || 0,
+      '3S': ((totalValues["3S"].score) / totalValues["3S"].credit) || 0
+    })  
+    
+  }, [coursesData, totalValues])
 
   return (
     <div className={classes.wrapper}>
@@ -151,7 +165,7 @@ const App = () => {
             <FormLabel component="legend">{course.name}</FormLabel>
             <RadioGroup aria-label={course.name} name={course.name} row>
               {
-                grades.map(grade => <FormControlLabel key={grade} value={grade} onInput={() => manageCourse(course.name, course.credit, '2A', grade)} control={<Radio color="default" />} label={grade} />)
+                grades.map(grade => <FormControlLabel key={grade} value={grade} onInput={() => manageEachCourse(course.name, grade)} control={<Radio color="default" />} label={grade} />)
               }
             </RadioGroup>
           </div>
@@ -164,13 +178,13 @@ const App = () => {
             <FormLabel component="legend">{course.name}</FormLabel>
             <RadioGroup aria-label={course.name} name={course.name} row aria-required>
               {
-                grades.map(grade => <FormControlLabel key={grade} value={grade} onInput={() => manageCourse(course.name, course.credit, '3S', grade)} control={<Radio color="default" />} label={grade} />)
+                grades.map(grade => <FormControlLabel key={grade} value={grade} onInput={() => manageEachCourse(course.name, grade)} control={<Radio color="default" />} label={grade} />)
               }
             </RadioGroup>
           </div>
         ))}
       </FormControl>
-     <>
+
       <Button
             variant="contained"
             color="secondary"
@@ -180,54 +194,10 @@ const App = () => {
           >
             RESET
         </Button>
-     </>
-      <Card className={classes.result}>
-        <CardContent>
-          <h3>2A + 3S</h3>
-            <p>score: {averageBoth} {averageBoth > average3S && <span className={classes.higher}>[higher!]</span>}</p>
-            {
-              excludeBoth.length > 0 && <p>(excluded: {excludeBoth.map(ex => ex.name).join(',')})</p>
-            }
-            {
-              exclusionNumBoth > 0 && (
-                <Accordion>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1a-content"
-                    id="panel1a-header"
-                  >
-                    <Typography>Select Exclusion... (up to {exclusionNumBoth} credits)</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                  <FormControl component="fieldset">
-                  <FormLabel component="legend">除外可能な科目を成績順に表示しています。You can exclude the raw scores up to {exclusionNumBoth} credits</FormLabel>
-                    <FormGroup>
-                      {
-                        courses.filter(co => co.credit <= exclusionNumBoth).sort((a,b) => a.score - b.score).map(c => (
-                          <FormControlLabel
-                            control={<Checkbox checked={isExcluded(excludeBoth, c)} onChange={(e) => {
-                              handleExcludeBoth(c, e.target.checked)
-                            }} name={c.name} />}
-                            label={`${c.name} (credit: ${c.credit}, your score: ${c.score})`}
-                            disabled={!isExcluded(excludeBoth, c) && !isUnderLimitBoth}
-                          />
-                        ))
-                      }
-                    </FormGroup>
-                    <FormHelperText>You can display an error</FormHelperText>
-                  </FormControl>
-                  </AccordionDetails>
-                </Accordion>
-              )
-            }
-        </CardContent>
-      </Card>
-      <Card className={classes.result}>
-        <CardContent>
-          <h3>3S only</h3>
-            <p>score: {average3S} {averageBoth < average3S && <span className={classes.higher}>[higher!]</span>}</p>
-        </CardContent>
-      </Card>
+     
+     <ScoreDisplay target={['2A', '3S']} averageScore={averageScore} totalValues={totalValues} />
+     <ScoreDisplay target={['3S']} averageScore={averageScore} totalValues={totalValues} />
+     
       {/* <div>
         <TextField required label="Student ID" variant="outlined" className={classes.textInput} />
         <TextField required label="Your Name (full)" variant="outlined" className={classes.textInput} />

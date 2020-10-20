@@ -1,4 +1,4 @@
-export interface course { name: string; credit: number }
+export interface course { name: string; credit: number, semester: '2A' | '3S' }
 export const courses2A: course[] = [
   {
     name: 'Quantum Chemisty I',
@@ -20,7 +20,7 @@ export const courses2A: course[] = [
     name: 'Chemical Thermodynamics I',
     credit: 2,
   }
-]
+].map(c => ({name: c.name, credit: c.credit, semester: '2A'}))
 
 export const courses3S: course[] = [
   {
@@ -51,4 +51,4 @@ export const courses3S: course[] = [
     name: 'Organic Chemisty III',
     credit: 2,
   },
-]
+].map(c => ({name: c.name, credit: c.credit, semester: '3S'}))
