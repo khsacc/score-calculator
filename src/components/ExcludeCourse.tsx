@@ -65,21 +65,24 @@ export const ExlcludeCourse = (props: {
                   props.coursesData
                     .filter(c => typeof c.grade !== 'undefined' && props.target.includes(c.semester)) // 当該セメスターのみ抽出
                     .sort((a, b) => getScore(a.grade as grade) - getScore(b.grade as grade)) // 点数順にソート
-                    .map((c, idx) => (
+                    .map((c, idx) => !(
+                      (props.isBoth ? !c.excludedBoth : !c.excluded3S) &&
+                      (c.credit > exclusionRemain || exclusionRemain <= 0)
+                    ) && (
                       <FormControlLabel
                         key={idx}
                         control={
                           <Checkbox
                             checked={props.isBoth ? c.excludedBoth :c.excluded3S}
                             onChange={(e) => {
-                              // if (
-                              //   !(
-                              //     (props.isBoth ? !c.excludedBoth : !c.excluded3S) &&
-                              //     (c.credit > exclusionRemain || exclusionRemain <= 0)
-                              //   )
-                              // ) {
+                              if (
+                                !(
+                                  (props.isBoth ? !c.excludedBoth : !c.excluded3S) &&
+                                  (c.credit > exclusionRemain || exclusionRemain <= 0)
+                                )
+                              ) {
                                 props.toggleExclusionEachCourse(c.name, props.isBoth ? 'both' : '3S')
-                              // }
+                              }
                             }}
                             name={c.name}
                           />
