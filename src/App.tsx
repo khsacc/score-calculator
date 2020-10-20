@@ -110,7 +110,6 @@ const App = () => {
     )))
   }
 
-  // 平均値の計算
   const [totalValues, setTotalValues] = useState({
     '2A': {score: 0, credit: 0},
     '3S': {score: 0, credit: 0}
@@ -118,14 +117,13 @@ const App = () => {
 
   const [averageScore, setAverageScore] = useState({ both: 0, '3S' : 0 } as AverageScore)
 
-
   useEffect(() => {
     // 計算函数の定義
     const getTotalValues = (target: semesters[]) => {
       // 単位数合計と点数合計を計算する
       return coursesData.reduce((pre: {score: number, credit: number}, cur) => (
-        // 当該セメスターの科目であり、かつ、ラジオボタンに何かしらの成績が入力されているものが計算対象
-        target.includes(cur.semester) && typeof cur.grade !== 'undefined'
+        // 当該セメスターの科目であり、かつ、ラジオボタンに何かしらの成績が入力されており、かつその成績が合格であるもの対象
+        target.includes(cur.semester) && typeof cur.grade !== 'undefined' && getScore(cur.grade) > 0
           ? {
             score: pre.score + (getScore(cur.grade) * cur.credit),
             credit: pre.credit + cur.credit,
@@ -135,6 +133,7 @@ const App = () => {
     }
     
     // 取得単位数、合計得点を計算して格納する
+    // これは除外可能な単位数の計算にのみ使用する。平均値は直後のuseEffectで直接計算している。
     const [totalValues2A, totalValues3S] = [getTotalValues(['2A']), getTotalValues(['3S'])]
     setTotalValues({
       '2A': {
@@ -163,7 +162,7 @@ const App = () => {
     setAverageScore({
       both: calcAvg(coursesData.filter(c => typeof c.grade !== 'undefined' && !c.excludedBoth)), // 成績入力済みかつ除外対象外
       // ((totalValues["2A"].score + totalValues["3S"].score) / (totalValues["2A"].credit + totalValues["3S"].credit)) || 0,
-      '3S': calcAvg(coursesData.filter(c => typeof c.grade !== 'undefined' && c.semester === '3S' && !c.excludedBoth))
+      '3S': calcAvg(coursesData.filter(c => typeof c.grade !== 'undefined' && c.semester === '3S' && !c.excluded3S))
     })  
     
   }, [coursesData, totalValues])
