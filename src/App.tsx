@@ -5,6 +5,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { course, courses2A, courses3S } from './courses'
 import { ScoreDisplay } from './components/ScoreDisplay'
+import { Rules } from './components/Rules'
 
 export type grade = 'A+'| 'A'| 'B'| 'C'| 'Fail'| 'Absent';
 const grades: grade[] = ['A+', 'A', 'B', 'C', 'Fail', 'Absent']
@@ -170,6 +171,7 @@ const App = () => {
   return (
     <div className={classes.wrapper}>
       <h1>Score Calculator</h1>
+      <Rules />
       <h2>2A semester</h2>
       <FormControl component="fieldset">
         {courses2A.map((course, idx) => (
