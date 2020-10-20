@@ -147,12 +147,22 @@ const App = () => {
     })
   }, [coursesData])
 
-  // 成績データの監視
   useEffect(() => {
     // 平均値の計算
+    const calcAvg = (arr: CoursesData[]) => {
+      const values = arr.reduce((pre, cur) => {
+        return {
+          credit: pre.credit + cur.credit,
+          score: pre.score + (getScore(cur.grade as grade) * cur.credit)
+        }
+      }, {credit: 0, score: 0})
+      
+      return values.score / values.credit || 0
+    }
     setAverageScore({
-      both: ((totalValues["2A"].score + totalValues["3S"].score) / (totalValues["2A"].credit + totalValues["3S"].credit)) || 0,
-      '3S': ((totalValues["3S"].score) / totalValues["3S"].credit) || 0
+      both: calcAvg(coursesData.filter(c => typeof c.grade !== 'undefined' && !c.excludedBoth)), // 成績入力済みかつ除外対象外
+      // ((totalValues["2A"].score + totalValues["3S"].score) / (totalValues["2A"].credit + totalValues["3S"].credit)) || 0,
+      '3S': calcAvg(coursesData.filter(c => typeof c.grade !== 'undefined' && c.semester === '3S' && !c.excludedBoth))
     })  
     
   }, [coursesData, totalValues])
