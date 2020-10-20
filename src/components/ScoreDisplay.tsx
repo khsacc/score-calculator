@@ -1,7 +1,8 @@
 import React from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Card, CardContent, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, makeStyles, Typography } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import { semesters, AverageScore, TotalValues } from '../App'
+import { semesters, AverageScore, TotalValues, CoursesData, grade } from '../App'
+import { ExlcludeCourse } from './ExcludeCourse'
 
 const useStyles = makeStyles((theme) => ({
   result: {
@@ -13,7 +14,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-export const ScoreDisplay = (props: {target: semesters[], averageScore: AverageScore, totalValues: TotalValues}) => {
+export const ScoreDisplay = (props: {
+  target: semesters[],
+  averageScore: AverageScore,
+  totalValues: TotalValues,
+  coursesData: CoursesData[],
+  toggleExclusionEachCourse: (name: string, kind: 'both' | '3S') => void
+}) => {
   const classes = useStyles()
 
   // targetの長さでどちらを表示しているかを判定する
@@ -36,6 +43,13 @@ export const ScoreDisplay = (props: {target: semesters[], averageScore: AverageS
                 targetScore > anotherScore && <span className={classes.higher}> [ higher ]</span>
               }
             </p>
+            <ExlcludeCourse
+              target={['2A', '3S']}
+              totalValues={props.totalValues}
+              toggleExclusionEachCourse={props.toggleExclusionEachCourse}
+              coursesData={props.coursesData}
+              isBoth={props.target.length === 2}
+            />
             {
               // exclude3S.length > 0 && <p>(excluded: {exclude3S.map(ex => ex.name).join(',')})</p>
             }

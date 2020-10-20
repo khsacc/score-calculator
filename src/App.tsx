@@ -6,7 +6,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { course, courses2A, courses3S } from './courses'
 import { ScoreDisplay } from './components/ScoreDisplay'
 
-type grade = 'A+'| 'A'| 'B'| 'C'| 'Fail'| 'Absent';
+export type grade = 'A+'| 'A'| 'B'| 'C'| 'Fail'| 'Absent';
 const grades: grade[] = ['A+', 'A', 'B', 'C', 'Fail', 'Absent']
 export type semesters = '2A' | '3S'
 export type CoursesData = course & {grade: grade | undefined; excludedBoth: boolean; excluded3S: boolean }
@@ -52,23 +52,23 @@ const useStyles = makeStyles((theme) => {
 
 export type scoreData = {name : string; score: number; credit: number; semester: semesters;}
 
+export const getScore = (grade: grade): number => {
+  switch (grade) {
+    case 'A+':
+      return 4.3;
+    case 'A':
+      return 4;
+    case 'B':
+      return 3;
+    case 'C':
+      return 2;
+    default:
+      return 0
+  }
+}
+
 const App = () => {
   const classes = useStyles()
-
-  const getScore = (grade: grade): number => {
-    switch (grade) {
-      case 'A+':
-        return 4.3;
-      case 'A':
-        return 4;
-      case 'B':
-        return 3;
-      case 'C':
-        return 2;
-      default:
-        return 0
-    }
-  }
 
   const coursesDataInit: CoursesData[] = [...courses2A, ...courses3S].map(c => ({ ...c, grade: undefined, excludedBoth: false, excluded3S: false}))
   // 全ての成績に関する情報をこのstateに格納する
@@ -93,6 +93,7 @@ const App = () => {
 
   // 除外函数
   const toggleExclusionEachCourse = (name: string, kind: 'both' | '3S') => {
+    console.log(`${name} excluded from ${kind}`)
     setCoursesData(coursesData.map(c => (
       c.name === name
         ? 
@@ -119,17 +120,18 @@ const App = () => {
 
   useEffect(() => {
     // 計算函数の定義
-    const getTotalValues = (target: semesters[]) => 
-    // まず単位数合計と点数合計を計算する
-    coursesData.reduce((pre: {score: number, credit: number}, cur) => (
-      // 当該セメスターの科目であり、かつ、ラジオボタンに何かしらの成績が入力されているものが計算対象
-      target.includes(cur.semester) && typeof cur.grade !== 'undefined'
-        ? {
-          score: pre.score + (getScore(cur.grade) * cur.credit),
-          credit: pre.credit + cur.credit,
-        }
-        : pre
-      ), {score: 0, credit: 0})
+    const getTotalValues = (target: semesters[]) => {
+      // 単位数合計と点数合計を計算する
+      return coursesData.reduce((pre: {score: number, credit: number}, cur) => (
+        // 当該セメスターの科目であり、かつ、ラジオボタンに何かしらの成績が入力されているものが計算対象
+        target.includes(cur.semester) && typeof cur.grade !== 'undefined'
+          ? {
+            score: pre.score + (getScore(cur.grade) * cur.credit),
+            credit: pre.credit + cur.credit,
+          }
+          : pre
+        ), {score: 0, credit: 0})
+    }
     
     // 取得単位数、合計得点を計算して格納する
     const [totalValues2A, totalValues3S] = [getTotalValues(['2A']), getTotalValues(['3S'])]
@@ -195,8 +197,20 @@ const App = () => {
             RESET
         </Button>
      
-     <ScoreDisplay target={['2A', '3S']} averageScore={averageScore} totalValues={totalValues} />
-     <ScoreDisplay target={['3S']} averageScore={averageScore} totalValues={totalValues} />
+     <ScoreDisplay 
+        target={['2A', '3S']}
+        averageScore={averageScore}
+        totalValues={totalValues}
+        toggleExclusionEachCourse={toggleExclusionEachCourse}
+        coursesData={coursesData}
+      />
+     <ScoreDisplay 
+      target={['3S']} 
+      averageScore={averageScore} 
+      totalValues={totalValues}
+      toggleExclusionEachCourse={toggleExclusionEachCourse} 
+      coursesData={coursesData}
+     />
      
       {/* <div>
         <TextField required label="Student ID" variant="outlined" className={classes.textInput} />
