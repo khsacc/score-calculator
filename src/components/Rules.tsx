@@ -27,7 +27,7 @@ export const Rules = () => {
             <li className={classes.list}>3Sの平均について：総取得数12以上17未満→1単位、17以上→2単位</li>
             <li className={classes.list}>2A+3Sの平均について：総取得数15以上25未満→2単位、25以上30未満→3単位、30以上→4単位</li>
           </ul>
-        <li>研究室見学に行った研究室については、当該研究室への配属を希望する場合において、算出した平均値に0.1を加算します。</li>
+        <li className={classes.list}>研究室見学に行った研究室については、当該研究室への配属を希望する場合において、算出した平均値に0.1を加算します。</li>
          </ul>
          
        </AccordionDetails>
