@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core';
+import { Input, makeStyles, TextField } from '@material-ui/core';
 import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Button } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { course, courses2A, courses3S } from './courses'
 import { ScoreDisplay } from './components/ScoreDisplay'
 import { Rules } from './components/Rules'
+import ReactDOM from 'react-dom';
+import ReactPDF, { BlobProvider, PDFViewer } from '@react-pdf/renderer';
+import { PDF } from './components/Pdf'
 
 export type grade = 'A+'| 'A'| 'B'| 'C'| 'Fail'| 'Absent';
 const grades: grade[] = ['A+', 'A', 'B', 'C', 'Fail', 'Absent']
@@ -169,6 +172,20 @@ const App = () => {
     
   }, [coursesData, totalValues])
 
+  const [nameData, setNameData] = useState("")
+  const [numberData, setNumberData] = useState("")
+
+  const [displayName, setDisplayName] = useState("")
+  useEffect(() => {
+    setDisplayName(`${numberData}_${nameData}`)
+  }, [nameData, numberData])
+
+  const [PDFData, setPDFData] = useState(<PDF name="" coursesData={coursesData} AverageScore={averageScore} />)
+  const [generated, setGenerated] = useState(false)
+  useEffect(() => {
+    setGenerated(false)
+  }, [averageScore, coursesData])
+
   return (
     <div className={classes.wrapper}>
       <h1>Score Calculator</h1>
@@ -231,6 +248,44 @@ const App = () => {
       toggleExclusionEachCourse={toggleExclusionEachCourse} 
       coursesData={coursesData}
      />
+     <div>
+       学生番号は「0520****」の形式のものをハイフンを入れずに半角数字で入力してください。<br />
+       氏名はアルファベットで入力してください（読みが面倒なので……）。日本語入力すると正しく出力されない設定にしてあります。<br />
+        <TextField required label="Student ID" variant="outlined" aria-required className={classes.textInput} onChange={e => setNumberData(e.target.value)} />
+        <TextField required label="Your Name (full)" variant="outlined" aria-required className={classes.textInput} onChange={e => setNameData(e.target.value)} />
+      </div>
+      {/* <div style={{margin: 20}}>
+        成績証明書の写真を下のボタンからアップロードしてください。<br />
+        <input type="file" alt="成績証明書の写真" />
+      </div> */}
+      {!generated && <p>データを全て入力し、「Generate PDF」ボタンを押してください。<br />PDF生成が終了すると、保存ボタンが表示されるので、クリックして保存してください。</p>}
+      <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          className={classes.button}
+          onClick={() => {
+            setPDFData(<PDF name={displayName} coursesData={coursesData} AverageScore={averageScore} />);
+            setGenerated(true)
+          }}
+          disabled={nameData === '' || numberData === ''}
+        >
+          {generated ? 'Re-generate PDF' : 'Generate PDF'}
+      </Button>
+      {generated && <BlobProvider document={PDFData}>
+        {({ blob, url, loading, error }) => {
+          // Do whatever you need with blob here
+          return <a href={url as string} style={{textDecoration: 'none'}} target="_blank" rel="noopener noreferrer"><Button
+            variant="contained"
+            color="secondary"
+            size="large"
+            className={classes.button}
+            startIcon={<SaveIcon />}
+          >
+            Save PDF
+          </Button></a>
+        }}
+      </BlobProvider>}
     </div>
     
   );
