@@ -53,6 +53,7 @@ const useStyles = makeStyles((theme) => {
 
 export type scoreData = {name : string; score: number; credit: number; semester: semesters;}
 
+// 成績に対して対応する点数をnumberで返す
 export const getScore = (grade: grade): number => {
   switch (grade) {
     case 'A+':
@@ -110,6 +111,7 @@ const App = () => {
     )))
   }
 
+  // 総単位数、総取得点数を計算する。ここでは除外は考慮されていないことに注意する。
   const [totalValues, setTotalValues] = useState({
     '2A': {score: 0, credit: 0},
     '3S': {score: 0, credit: 0}
@@ -171,6 +173,7 @@ const App = () => {
     <div className={classes.wrapper}>
       <h1>Score Calculator</h1>
       <Rules />
+      <p style={{fontWeight: 'bold'}}>履修していない科目については、どのラジオボタンも選択せず空欄にしてください</p>
       <h2>2A semester</h2>
       <FormControl component="fieldset">
         {courses2A.map((course, idx) => (
@@ -207,6 +210,12 @@ const App = () => {
           >
             RESET
         </Button>
+
+      <p>
+        計算された平均値が以下に表示されます。念のため自分でも確認してください。
+        <br />
+        除外できる単位数に達していると、除外可能な科目が成績順に表示されます。適宜選択してください。
+      </p>
      
      <ScoreDisplay 
         target={['2A', '3S']}
@@ -222,22 +231,6 @@ const App = () => {
       toggleExclusionEachCourse={toggleExclusionEachCourse} 
       coursesData={coursesData}
      />
-     
-      {/* <div>
-        <TextField required label="Student ID" variant="outlined" className={classes.textInput} />
-        <TextField required label="Your Name (full)" variant="outlined" className={classes.textInput} />
-      </div>
-      <div>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          className={classes.button}
-          startIcon={<SaveIcon />}
-        >
-          Export PDF
-        </Button>
-      </div> */}
     </div>
     
   );
