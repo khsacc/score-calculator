@@ -13,6 +13,7 @@ const grades: grade[] = ['A+', 'A', 'B', 'C', 'Fail', 'Absent']
 export type semesters = '2A' | '3S'
 export type CoursesData = course & {grade: grade | undefined; excludedBoth: boolean; excluded3S: boolean }
 export type AverageScore = { both: number; '3S': number }
+export type RawAverageScore = {credit: number, score: number, avg: number}
 
 type TotalValue = {score: number, credit: number}
 export type TotalValues = {'2A' : TotalValue, '3S': TotalValue}
@@ -120,6 +121,7 @@ const App = () => {
   } as TotalValues)
 
   const [averageScore, setAverageScore] = useState({ both: 0, '3S' : 0 } as AverageScore)
+  const [rawAverageScore, setRawAverageScore] = useState({ both: {credit: 0, score: 0, avg: 0}, '3S': {credit: 0, score: 0, avg: 0}})
 
   useEffect(() => {
     // 計算函数の定義
@@ -138,7 +140,7 @@ const App = () => {
     
     // 取得単位数、合計得点を計算して格納する
     
-    const calcAvg = (arr: CoursesData[]): number => {
+    const calcAvg = (arr: CoursesData[]): RawAverageScore => {
       const values = arr.reduce((pre, cur) => {
         return {
           credit: pre.credit + cur.credit,
@@ -146,7 +148,7 @@ const App = () => {
         }
       }, {credit: 0, score: 0})
       
-      return Math.round((values.score / values.credit) * 100) / 100 || 0
+      return {credit: Math.round(values.credit*100)/100, score: Math.round(values.score*100)/100, avg: Math.round((values.score / values.credit) * 100) / 100 || 0}
     }
 
     const [totalValues2A, totalValues3S] = [getTotalValues(['2A']), getTotalValues(['3S'])]
@@ -161,10 +163,13 @@ const App = () => {
       }
     })
     // 平均値の計算
+    // 成績入力済みかつ除外対象外
+    const calBoth = calcAvg(coursesData.filter(c => typeof c.grade !== 'undefined' && !c.excludedBoth))
+    const cal3S = calcAvg(coursesData.filter(c => typeof c.grade !== 'undefined' && c.semester === '3S' && !c.excluded3S))
+    setRawAverageScore({both: calBoth, '3S': cal3S})
     setAverageScore({
-      both: calcAvg(coursesData.filter(c => typeof c.grade !== 'undefined' && !c.excludedBoth)), // 成績入力済みかつ除外対象外
-      // ((totalValues["2A"].score + totalValues["3S"].score) / (totalValues["2A"].credit + totalValues["3S"].credit)) || 0,
-      '3S': calcAvg(coursesData.filter(c => typeof c.grade !== 'undefined' && c.semester === '3S' && !c.excluded3S))
+      both: calBoth.avg, 
+      '3S': cal3S.avg
     })  
   }, [coursesData])
 
@@ -239,6 +244,7 @@ const App = () => {
      <ScoreDisplay 
         target={['2A', '3S']}
         averageScore={averageScore}
+        rawAverageScore={rawAverageScore}
         totalValues={totalValues}
         toggleExclusionEachCourse={toggleExclusionEachCourse}
         coursesData={coursesData}
@@ -246,6 +252,7 @@ const App = () => {
      <ScoreDisplay 
       target={['3S']} 
       averageScore={averageScore} 
+      rawAverageScore={rawAverageScore}
       totalValues={totalValues}
       toggleExclusionEachCourse={toggleExclusionEachCourse} 
       coursesData={coursesData}

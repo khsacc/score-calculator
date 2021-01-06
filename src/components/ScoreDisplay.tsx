@@ -1,6 +1,6 @@
 import React from 'react'
 import { Card, CardContent, makeStyles } from '@material-ui/core'
-import { semesters, AverageScore, TotalValues, CoursesData } from '../App'
+import { semesters, AverageScore, TotalValues, CoursesData, RawAverageScore } from '../App'
 import { ExlcludeCourse } from './ExcludeCourse'
 
 const useStyles = makeStyles((theme) => ({
@@ -16,6 +16,7 @@ const useStyles = makeStyles((theme) => ({
 export const ScoreDisplay = (props: {
   target: semesters[],
   averageScore: AverageScore,
+  rawAverageScore: {both: RawAverageScore, '3S': RawAverageScore},
   totalValues: TotalValues,
   coursesData: CoursesData[],
   toggleExclusionEachCourse: (name: string, kind: 'both' | '3S') => void
@@ -26,6 +27,9 @@ export const ScoreDisplay = (props: {
   const [targetScore, anotherScore] = props.target.length === 1 
     ? [props.averageScore["3S"], props.averageScore.both]
     : [props.averageScore.both, props.averageScore["3S"]]
+  const [targetRawScore, anotherRawScore] = props.target.length === 1 
+    ? [props.rawAverageScore["3S"], props.rawAverageScore.both]
+    : [props.rawAverageScore.both, props.rawAverageScore["3S"]]
 
   return (
     <>
@@ -37,13 +41,13 @@ export const ScoreDisplay = (props: {
             }
           </h3>
             <p>
-              score: {targetScore}
+              score: {targetRawScore.score} / {targetRawScore.credit} = {targetScore}
               {
                 targetScore > anotherScore && <span className={classes.higher}> [ higher ]</span>
               }
             </p>
             <ExlcludeCourse
-              target={['2A', '3S']}
+              target={props.target}
               totalValues={props.totalValues}
               toggleExclusionEachCourse={props.toggleExclusionEachCourse}
               coursesData={props.coursesData}
