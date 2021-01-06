@@ -5,7 +5,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import { course, courses2A, courses3S } from './courses'
 import { ScoreDisplay } from './components/ScoreDisplay'
 import { Rules } from './components/Rules'
-import { BlobProvider } from '@react-pdf/renderer';
+import { BlobProvider, PDFDownloadLink } from '@react-pdf/renderer';
 import { PDF } from './components/Pdf'
 
 export type grade = 'A+'| 'A'| 'B'| 'C'| 'Fail'| 'Absent';
@@ -32,8 +32,8 @@ const useStyles = makeStyles((theme) => {
       margin: '15px 0'
     },
     button: {
-      margin: '10px auto',
-      display: 'block',
+      // margin: '10px auto',
+      // display: 'block',
     },
     result: {
       textAlign: 'center',
@@ -170,11 +170,6 @@ const App = () => {
   const [nameData, setNameData] = useState("")
   const [numberData, setNumberData] = useState("")
 
-  const [displayName, setDisplayName] = useState("")
-  useEffect(() => {
-    setDisplayName(`${numberData}_${nameData}`)
-  }, [nameData, numberData])
-
   const [PDFData, setPDFData] = useState(<PDF name="" coursesData={coursesData} AverageScore={averageScore} />)
   const [generated, setGenerated] = useState(false)
 
@@ -183,6 +178,11 @@ const App = () => {
     setGenerated(false);
     setIsReady(nameData !== '' && numberData !== '' && coursesData.filter(c => c.semester === '2A').every(c => typeof c.grade !== 'undefined'))
   }, [coursesData, nameData, numberData])
+
+  const generatePDF = () => {
+    setPDFData(<PDF name={`${numberData}_${nameData}`} coursesData={coursesData} AverageScore={averageScore} />);
+    setGenerated(true)
+  }
 
   return (
     <div className={classes.wrapper}>
@@ -216,15 +216,18 @@ const App = () => {
         ))}
       </FormControl>
 
-      <Button
-            variant="contained"
-            color="secondary"
-            size="large"
-            className={classes.button}
-            onClick={() => {window.location.reload()}}
-          >
-            RESET
+      <div>
+        <Button
+          variant="contained"
+          color="secondary"
+          size="large"
+          className={classes.button}
+          onClick={() => {window.location.reload()}}
+        >
+          RESET
         </Button>
+      </div>
+      
 
       <p>
         計算された平均値が以下に表示されます。念のため自分でも確認してください。
@@ -263,16 +266,30 @@ const App = () => {
           size="large"
           className={classes.button}
           onClick={() => {
-            setPDFData(<PDF name={displayName} coursesData={coursesData} AverageScore={averageScore} />);
-            setGenerated(true)
+            generatePDF()
           }}
-          // disabled={!isReady}
-          disabled={true}
+          disabled={!isReady}
+          // disabled={true}
         >
           {generated ? 'Re-generate PDF' : 'Generate PDF'}
       </Button>
       <p>算出ルールの最終確認中のため、まだPDF作成はできません。8日金曜日ごろ解禁する予定です。</p>
-      {generated && <BlobProvider document={PDFData}>
+      {
+        generated && (
+          <PDFDownloadLink fileName={`${numberData}_${nameData}`} document={PDFData} style={{textDecoration: 'none', width: 'fit-content'}}>
+            <Button
+              variant="contained"
+              color="secondary"
+              size="large"
+              className={classes.button}
+              startIcon={<SaveIcon style={{margin: 0}} />}
+            >
+              Save PDF
+            </Button>
+          </PDFDownloadLink>
+        )
+      }
+      {/* {generated && <BlobProvider document={PDFData}>
         {({ url }) => {
           // Do whatever you need with blob here
           return <a href={url as string} style={{textDecoration: 'none'}} target="_blank" rel="noopener noreferrer"><Button
@@ -285,7 +302,7 @@ const App = () => {
             Save PDF
           </Button></a>
         }}
-      </BlobProvider>}
+      </BlobProvider>} */}
     </div>
     
   );
