@@ -27,9 +27,9 @@ export const ScoreDisplay = (props: {
   const [targetScore, anotherScore] = props.target.length === 1 
     ? [props.averageScore["3S"], props.averageScore.both]
     : [props.averageScore.both, props.averageScore["3S"]]
-  const [targetRawScore, anotherRawScore] = props.target.length === 1 
-    ? [props.rawAverageScore["3S"], props.rawAverageScore.both]
-    : [props.rawAverageScore.both, props.rawAverageScore["3S"]]
+  const targetRawScore = props.target.length === 1 
+    ? props.rawAverageScore["3S"]
+    : props.rawAverageScore.both
 
   return (
     <>
