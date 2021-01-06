@@ -5,7 +5,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import { course, courses2A, courses3S } from './courses'
 import { ScoreDisplay } from './components/ScoreDisplay'
 import { Rules } from './components/Rules'
-import { BlobProvider, PDFDownloadLink } from '@react-pdf/renderer';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import { PDF } from './components/Pdf'
 
 export type grade = 'A+'| 'A'| 'B'| 'C'| 'Fail'| 'Absent';
@@ -26,7 +26,8 @@ const useStyles = makeStyles((theme) => {
       textAlign: 'center'
     },
     textInput: {
-      padding: '0 10px 10px 0'
+      padding: '0px 10px 10px 0',
+      margin: 10,
     },
     eachInputWrap: {
       margin: '15px 0'
@@ -260,6 +261,11 @@ const App = () => {
         <input type="file" alt="成績証明書の写真" />
       </div> */}
       {!generated && <p>データを全て入力し、「Generate PDF」ボタンを押してください。<br />PDF生成が終了すると、保存ボタンが表示されるので、クリックして保存してください。</p>}
+      <>
+        {coursesData.filter(c => c.semester === '2A').some(c => typeof c.grade === 'undefined') && <li>2Aの必修科目の成績を入力してください</li>}
+        {nameData === '' && <li>氏名をアルファベット表記で入力してください。</li>}
+        {numberData === '' && <li>学籍番号を入力してください。</li>}
+      </>
       <Button
           variant="contained"
           color="primary"
