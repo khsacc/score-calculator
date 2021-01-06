@@ -266,7 +266,7 @@ const App = () => {
             setPDFData(<PDF name={displayName} coursesData={coursesData} AverageScore={averageScore} />);
             setGenerated(true)
           }}
-          disabled={isReady}
+          disabled={!isReady}
           // disabled={true}
         >
           {generated ? 'Re-generate PDF' : 'Generate PDF'}
