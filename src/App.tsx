@@ -268,8 +268,8 @@ const App = () => {
           onClick={() => {
             generatePDF()
           }}
-          disabled={!isReady}
-          // disabled={true}
+          // disabled={!isReady}
+          disabled={true}
         >
           {generated ? 'Re-generate PDF' : 'Generate PDF'}
       </Button>
