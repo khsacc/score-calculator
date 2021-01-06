@@ -136,7 +136,18 @@ const App = () => {
     }
     
     // 取得単位数、合計得点を計算して格納する
-    // これは除外可能な単位数の計算にのみ使用する。平均値は直後のuseEffectで直接計算している。
+    
+    const calcAvg = (arr: CoursesData[]) => {
+      const values = arr.reduce((pre, cur) => {
+        return {
+          credit: pre.credit + cur.credit,
+          score: pre.score + (getScore(cur.grade as grade) * cur.credit)
+        }
+      }, {credit: 0, score: 0})
+      
+      return values.score / values.credit || 0
+    }
+
     const [totalValues2A, totalValues3S] = [getTotalValues(['2A']), getTotalValues(['3S'])]
     setTotalValues({
       '2A': {
@@ -148,27 +159,13 @@ const App = () => {
         credit: totalValues3S.credit,
       }
     })
-  }, [coursesData])
-
-  useEffect(() => {
     // 平均値の計算
-    const calcAvg = (arr: CoursesData[]) => {
-      const values = arr.reduce((pre, cur) => {
-        return {
-          credit: pre.credit + cur.credit,
-          score: pre.score + (getScore(cur.grade as grade) * cur.credit)
-        }
-      }, {credit: 0, score: 0})
-      
-      return values.score / values.credit || 0
-    }
     setAverageScore({
       both: calcAvg(coursesData.filter(c => typeof c.grade !== 'undefined' && !c.excludedBoth)), // 成績入力済みかつ除外対象外
       // ((totalValues["2A"].score + totalValues["3S"].score) / (totalValues["2A"].credit + totalValues["3S"].credit)) || 0,
       '3S': calcAvg(coursesData.filter(c => typeof c.grade !== 'undefined' && c.semester === '3S' && !c.excluded3S))
     })  
-    
-  }, [coursesData, totalValues])
+  }, [coursesData])
 
   const [nameData, setNameData] = useState("")
   const [numberData, setNumberData] = useState("")
@@ -180,9 +177,12 @@ const App = () => {
 
   const [PDFData, setPDFData] = useState(<PDF name="" coursesData={coursesData} AverageScore={averageScore} />)
   const [generated, setGenerated] = useState(false)
+
+  const [isReady, setIsReady] = useState(false)
   useEffect(() => {
-    setGenerated(false)
-  }, [averageScore, coursesData])
+    setGenerated(false);
+    setIsReady(nameData !== '' && numberData !== '' && coursesData.filter(c => c.semester === '2A').every(c => typeof c.grade !== 'undefined'))
+  }, [coursesData, nameData, numberData])
 
   return (
     <div className={classes.wrapper}>
@@ -266,8 +266,8 @@ const App = () => {
             setPDFData(<PDF name={displayName} coursesData={coursesData} AverageScore={averageScore} />);
             setGenerated(true)
           }}
-          // disabled={nameData === '' || numberData === ''}
-          disabled={true}
+          disabled={isReady}
+          // disabled={true}
         >
           {generated ? 'Re-generate PDF' : 'Generate PDF'}
       </Button>
