@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Input, makeStyles, TextField } from '@material-ui/core';
+import { makeStyles, TextField } from '@material-ui/core';
 import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Button } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { course, courses2A, courses3S } from './courses'
 import { ScoreDisplay } from './components/ScoreDisplay'
 import { Rules } from './components/Rules'
-import ReactDOM from 'react-dom';
-import ReactPDF, { BlobProvider, PDFViewer } from '@react-pdf/renderer';
+import { BlobProvider } from '@react-pdf/renderer';
 import { PDF } from './components/Pdf'
-import { createTrue } from 'typescript';
 
 export type grade = 'A+'| 'A'| 'B'| 'C'| 'Fail'| 'Absent';
 const grades: grade[] = ['A+', 'A', 'B', 'C', 'Fail', 'Absent']
@@ -276,7 +273,7 @@ const App = () => {
       </Button>
       <p>算出ルールの最終確認中のため、まだPDF作成はできません。8日金曜日ごろ解禁する予定です。</p>
       {generated && <BlobProvider document={PDFData}>
-        {({ blob, url, loading, error }) => {
+        {({ url }) => {
           // Do whatever you need with blob here
           return <a href={url as string} style={{textDecoration: 'none'}} target="_blank" rel="noopener noreferrer"><Button
             variant="contained"

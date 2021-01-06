@@ -1,4 +1,4 @@
-import { Accordion, AccordionSummary, AccordionDetails, FormControl, FormLabel, FormGroup, FormControlLabel, Checkbox } from "@material-ui/core";
+import { Accordion, AccordionSummary, AccordionDetails, FormControl, FormGroup, FormControlLabel, Checkbox } from "@material-ui/core";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import React, { useEffect, useState } from "react";
 import { semesters, TotalValues, CoursesData, getScore, grade } from "../App";
@@ -74,7 +74,7 @@ export const ExlcludeCourse = (props: {
                         control={
                           <Checkbox
                             checked={props.isBoth ? c.excludedBoth :c.excluded3S}
-                            onChange={(e) => {
+                            onChange={() => {
                               if (
                                 !(
                                   (props.isBoth ? !c.excludedBoth : !c.excluded3S) &&
