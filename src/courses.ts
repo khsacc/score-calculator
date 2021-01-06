@@ -49,10 +49,10 @@ export const courses3S: course[] = [
   },
   {
     name: 'Quantum Chemistry II', 
-    credit: 2,
+    credit: 3,
   },
   {
     name: 'Organic Chemistry III',
-    credit: 2,
+    credit: 3,
   },
 ].map(c => ({name: c.name, credit: c.credit, semester: '3S'}))
