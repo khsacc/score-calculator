@@ -126,7 +126,7 @@ const App = () => {
     const getTotalValues = (target: semesters[]) => {
       // 単位数合計と点数合計を計算する
       return coursesData.reduce((pre: {score: number, credit: number}, cur) => (
-        // 当該セメスターの科目であり、かつ、ラジオボタンに何かしらの成績が入力されており、かつその成績が合格であるもの対象
+        // 当該セメスターの科目であり、かつ、ラジオボタンに何かしらの成績が入力されており（未履修でない）、かつその成績が合格であるもの対象
         target.includes(cur.semester) && typeof cur.grade !== 'undefined' && getScore(cur.grade) > 0
           ? {
             score: pre.score + (getScore(cur.grade) * cur.credit),
@@ -138,7 +138,7 @@ const App = () => {
     
     // 取得単位数、合計得点を計算して格納する
     
-    const calcAvg = (arr: CoursesData[]) => {
+    const calcAvg = (arr: CoursesData[]): number => {
       const values = arr.reduce((pre, cur) => {
         return {
           credit: pre.credit + cur.credit,
@@ -146,7 +146,7 @@ const App = () => {
         }
       }, {credit: 0, score: 0})
       
-      return values.score / values.credit || 0
+      return Math.round((values.score / values.credit) * 100) / 100 || 0
     }
 
     const [totalValues2A, totalValues3S] = [getTotalValues(['2A']), getTotalValues(['3S'])]
