@@ -289,20 +289,6 @@ const App = () => {
           </PDFDownloadLink>
         )
       }
-      {/* {generated && <BlobProvider document={PDFData}>
-        {({ url }) => {
-          // Do whatever you need with blob here
-          return <a href={url as string} style={{textDecoration: 'none'}} target="_blank" rel="noopener noreferrer"><Button
-            variant="contained"
-            color="secondary"
-            size="large"
-            className={classes.button}
-            startIcon={<SaveIcon />}
-          >
-            Save PDF
-          </Button></a>
-        }}
-      </BlobProvider>} */}
     </div>
     
   );
