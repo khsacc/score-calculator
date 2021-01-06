@@ -1,19 +1,19 @@
 export interface course { name: string; credit: number, semester: '2A' | '3S' }
 export const courses2A: course[] = [
   {
-    name: 'Quantum Chemisty I',
+    name: 'Quantum Chemistry I',
     credit: 2,
   },
   {
-    name: 'Analytical Chemisty I',
+    name: 'Analytical Chemistry I',
     credit: 2,
   },
   {
-    name: 'Organic Chemisty I',
+    name: 'Organic Chemistry I',
     credit: 4,
   },
   {
-    name: 'Inorganic Chemisty I',
+    name: 'Inorganic Chemistry I',
     credit: 2,
   },
   {
@@ -40,15 +40,19 @@ export const courses3S: course[] = [
     credit: 1,
   },
   {
-    name: 'Structural Chemisty',
+    name: 'Structural Chemistry',
     credit: 2,
   },
   {
-    name: 'Inorganic Chemisty II',
+    name: 'Inorganic Chemistry II',
     credit: 2,
   },
   {
-    name: 'Organic Chemisty III',
+    name: 'Quantum Chemistry II', 
+    credit: 2,
+  },
+  {
+    name: 'Organic Chemistry III',
     credit: 2,
   },
 ].map(c => ({name: c.name, credit: c.credit, semester: '3S'}))
