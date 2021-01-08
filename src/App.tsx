@@ -299,7 +299,7 @@ const App = () => {
             generatePDF()
           }}
           // disabled={!isReady}
-          // disabled={true}
+          disabled={true}
         >
           {generated ? 'Re-generate PDF' : 'Generate PDF'}
       </Button>
