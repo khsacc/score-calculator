@@ -26,8 +26,10 @@ export const PDF = (props: {
   name: string,
   coursesData: CoursesData[],
   AverageScore: AverageScore,
+  visitedLab: string[]
 }) => {
   const acceptedScore = props.AverageScore.both >= props.AverageScore['3S'] ? props.AverageScore.both : props.AverageScore['3S']
+  const now = new Date();
   return (
   <Document title={props.name}>
     <Page size="A4" style={styles.page}>
@@ -36,6 +38,7 @@ export const PDF = (props: {
         <Text style={{fontSize: 20, fontWeight: 'bold'}}>SCORE</Text>
         <Text style={styles.acceptedScore}>{acceptedScore}</Text>
         <Text>(2A+3S: {props.AverageScore.both}, 3S: {props.AverageScore['3S']})</Text>
+        <Text>(Visited Lab(s): {props.visitedLab.join(', ')})</Text>
       </View>
       <View style={styles.section}>
         {
@@ -48,6 +51,11 @@ export const PDF = (props: {
               </Text>
           ))
         }
+      </View>
+      <View style={styles.section}>
+        <Text>
+          {now.toString()}
+        </Text>
       </View>
     </Page>
   </Document>

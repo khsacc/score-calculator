@@ -7,6 +7,7 @@ import { ScoreDisplay } from './components/ScoreDisplay'
 import { Rules } from './components/Rules'
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { PDF } from './components/Pdf'
+import { VisitedLab } from './components/VisitedLab'
 
 export type grade = 'A+'| 'A'| 'B'| 'C'| 'Fail'| 'Absent';
 const grades: grade[] = ['A+', 'A', 'B', 'C', 'Fail', 'Absent']
@@ -34,7 +35,7 @@ const useStyles = makeStyles((theme) => {
       margin: '15px 0'
     },
     button: {
-      // margin: '10px auto',
+      margin: '10px',
       // display: 'block',
     },
     result: {
@@ -173,20 +174,32 @@ const App = () => {
     })  
   }, [coursesData])
 
+  const [visitedLab, setVisitedLab] = useState([] as string[])
+  const changeVisited = (name: string) => {
+    const target = visitedLab.find(l => l === name)
+    if (typeof target === 'undefined') {
+      // 新規追加
+      setVisitedLab([...visitedLab, name])
+    } else {
+      // 削除
+      setVisitedLab(visitedLab.filter(e => e !== name))
+    }
+  }
+
   const [nameData, setNameData] = useState("")
   const [numberData, setNumberData] = useState("")
 
-  const [PDFData, setPDFData] = useState(<PDF name="" coursesData={coursesData} AverageScore={averageScore} />)
+  const [PDFData, setPDFData] = useState(<PDF visitedLab={visitedLab} name="" coursesData={coursesData} AverageScore={averageScore} />)
   const [generated, setGenerated] = useState(false)
 
   const [isReady, setIsReady] = useState(false)
   useEffect(() => {
     setGenerated(false);
-    setIsReady(nameData !== '' && numberData !== '' && coursesData.filter(c => c.semester === '2A').every(c => typeof c.grade !== 'undefined'))
+    setIsReady(nameData !== '' && numberData !== '' && coursesData.filter(c => c.required === true).every(c => typeof c.grade !== 'undefined'))
   }, [coursesData, nameData, numberData])
 
   const generatePDF = () => {
-    setPDFData(<PDF name={`${numberData}_${nameData}`} coursesData={coursesData} AverageScore={averageScore} />);
+    setPDFData(<PDF visitedLab={visitedLab} name={`${numberData}_${nameData}`} coursesData={coursesData} AverageScore={averageScore} />);
     setGenerated(true)
   }
 
@@ -258,6 +271,9 @@ const App = () => {
       coursesData={coursesData}
      />
      <div>
+       <VisitedLab changeVisited={changeVisited} />
+     </div>
+     <div>
        学生番号は「0520****」の形式のものをハイフンを入れずに半角数字で入力してください。<br />
        氏名はアルファベットで入力してください（読みが面倒なので……）。日本語入力すると正しく出力されない設定にしてあります。<br />
         <TextField required label="Student ID" variant="outlined" aria-required className={classes.textInput} onChange={e => setNumberData(e.target.value)} />
@@ -269,9 +285,10 @@ const App = () => {
       </div> */}
       {!generated && <p>データを全て入力し、「Generate PDF」ボタンを押してください。<br />PDF生成が終了すると、保存ボタンが表示されるので、クリックして保存してください。</p>}
       <>
-        {coursesData.filter(c => c.semester === '2A').some(c => typeof c.grade === 'undefined') && <li>2Aの必修科目の成績を入力してください</li>}
+        {coursesData.filter(c => c.required === true).some(c => typeof c.grade === 'undefined') && <li>必修科目の成績を入力してください。</li>}
         {nameData === '' && <li>氏名をアルファベット表記で入力してください。</li>}
         {numberData === '' && <li>学籍番号を入力してください。</li>}
+        {visitedLab.length === 0 && <li>訪問した研究室の選択がありませんが、問題ありませんか？</li>}
       </>
       <Button
           variant="contained"
@@ -282,11 +299,12 @@ const App = () => {
             generatePDF()
           }}
           // disabled={!isReady}
-          disabled={true}
+          // disabled={true}
         >
           {generated ? 'Re-generate PDF' : 'Generate PDF'}
       </Button>
-      <p>算出ルールの最終確認中のため、まだPDF作成はできません。8日金曜日ごろ解禁する予定です。</p>
+      <br />
+      {/* <p>算出ルールの最終確認中のため、まだPDF作成はできません。8日金曜日ごろ解禁する予定です。</p> */}
       {
         generated && (
           <PDFDownloadLink fileName={`${numberData}_${nameData}`} document={PDFData} style={{textDecoration: 'none', width: 'fit-content'}}>
